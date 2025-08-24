@@ -1,6 +1,6 @@
 // app/(main)/dashboard/page.tsx
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/lib/auth"; // <-- CORRECTED IMPORT
+import { authOptions } from '@/app/lib/auth'; // <-- CORRECTED IMPORT
 import { redirect } from "next/navigation";
 import CreateTicketForm from "@/app/components/CreateTicketForm";
 import WardenDashboard from "@/app/components/WardenDashboard";

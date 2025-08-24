@@ -1,17 +1,12 @@
-// app/api/tickets/[ticketId]/assign/route.ts
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/auth'; // <-- CORRECTED IMPORT
 import prisma from '@/app/lib/prisma';
 
-interface IParams {
-  ticketId?: string;
-}
-
 // --- MODIFICATION: Corrected function signature for Next.js App Router ---
 export async function PUT(
   request: Request,
-  { params }: { params: IParams }
+  { params }: { params: { ticketId: string } }
 ) {
   const session = await getServerSession(authOptions);
 
