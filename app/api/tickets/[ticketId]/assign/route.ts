@@ -1,12 +1,14 @@
+// app/api/tickets/[ticketId]/assign/route.ts
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/lib/auth'; // <-- CORRECTED IMPORT
 import prisma from '@/app/lib/prisma';
 
 interface IParams {
   ticketId?: string;
 }
 
+// --- MODIFICATION: Corrected function signature for Next.js App Router ---
 export async function PUT(
   request: Request,
   { params }: { params: IParams }
@@ -19,7 +21,7 @@ export async function PUT(
 
   const { ticketId } = params;
   const body = await request.json();
-  const { technicianName } = body; // We now expect a name, not an ID
+  const { technicianName } = body;
 
   if (!ticketId || !technicianName) {
     return new NextResponse('Missing ticket ID or technician name', { status: 400 });
@@ -30,7 +32,7 @@ export async function PUT(
       id: ticketId,
     },
     data: {
-      assignedTechnicianName: technicianName, // Store the name
+      assignedTechnicianName: technicianName,
       status: 'ASSIGNED',
     },
   });

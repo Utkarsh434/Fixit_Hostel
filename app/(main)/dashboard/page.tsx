@@ -1,5 +1,6 @@
+// app/(main)/dashboard/page.tsx
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/lib/auth"; // <-- CORRECTED IMPORT
 import { redirect } from "next/navigation";
 import CreateTicketForm from "@/app/components/CreateTicketForm";
 import WardenDashboard from "@/app/components/WardenDashboard";
@@ -22,7 +23,6 @@ const DashboardPage = async () => {
 
       {userRole === 'STUDENT' && <CreateTicketForm />}
       {userRole === 'WARDEN' && <WardenDashboard />}
-      {/* We can add a view for TECHNICIAN later */}
     </div>
   );
 };
