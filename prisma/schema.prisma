@@ -1,74 +1,72 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+    // This is your Prisma schema file,
+    // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-generator client {
-  provider = "prisma-client-js"
-}
+    generator client {
+      provider = "prisma-client-js"
+    }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+    datasource db {
+      provider = "postgresql"
+      url      = env("DATABASE_URL")
+    }
 
-// USER MODEL
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      UserRole @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    model User {
+      id        String   @id @default(cuid())
+      name      String
+      email     String   @unique
+      password  String
+      role      UserRole @default(STUDENT)
+      createdAt DateTime @default(now())
+      updatedAt DateTime @updatedAt
 
-  tickets   Ticket[]
-}
+      tickets   Ticket[]
+    }
 
-enum UserRole {
-  STUDENT
-  WARDEN
-  TECHNICIAN
-}
+    enum UserRole {
+      STUDENT
+      WARDEN
+      TECHNICIAN
+    }
 
+    model Ticket {
+      id          String   @id @default(cuid())
+      title       String
+      description String   @db.Text
+      category    Category
+      priority    Priority
+      status      Status   @default(OPEN)
+      createdAt   DateTime @default(now())
+      updatedAt   DateTime @updatedAt
 
-// TICKET MODEL
-model Ticket {
-  id          String   @id @default(cuid())
-  title       String
-  description String   @db.Text
-  category    Category
-  priority    Priority
-  status      Status   @default(OPEN)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+      // --- MODIFICATION: Make fields optional ---
+      hostel      String?
+      roomNumber  String?
 
-  // --- NEW FIELDS ---
-  hostel      String?
-  roomNumber  String?
+      assignedTechnicianName String?
+      studentId   String
+      student     User     @relation(fields: [studentId], references: [id])
+    }
 
-  assignedTechnicianName String?
-  studentId   String
-  student     User     @relation(fields: [studentId], references: [id])
-}
+    enum Category {
+      ELECTRICAL
+      PLUMBING
+      CARPENTRY
+      INTERNET
+      OTHER
+    }
 
-enum Category {
-  ELECTRICAL
-  PLUMBING
-  CARPENTRY
-  INTERNET
-  OTHER
-}
+    enum Priority {
+      P1_CRITICAL
+      P2_HIGH
+      P3_NORMAL
+      P4_LOW
+    }
 
-enum Priority {
-  P1_CRITICAL
-  P2_HIGH
-  P3_NORMAL
-  P4_LOW
-}
-
-enum Status {
-  OPEN
-  ASSIGNED
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-}
+    enum Status {
+      OPEN
+      ASSIGNED
+      IN_PROGRESS
+      RESOLVED
+      CLOSED
+    }
+    

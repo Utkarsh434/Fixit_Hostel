@@ -106,7 +106,8 @@ const LoginPage = () => {
           </div>
         </form>
          <p className="text-sm text-center text-gray-600">
-            Don't have an account?{' '}
+            {/* --- MODIFICATION: Escaped the apostrophe --- */}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="font-medium text-black hover:underline">
                 Sign up
             </Link>
