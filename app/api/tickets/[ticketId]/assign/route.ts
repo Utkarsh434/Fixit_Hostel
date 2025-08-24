@@ -1,12 +1,12 @@
+// app/api/tickets/[ticketId]/assign/route.ts
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/auth';
 import prisma from '@/app/lib/prisma';
 
-// --- MODIFICATION: Corrected function signature for Next.js App Router ---
+// --- FINAL FIX: Simplified function signature ---
 export async function PUT(
-  request: Request,
-  { params }: { params: { ticketId: string } }
+  request: Request
 ) {
   const session = await getServerSession(authOptions);
 
@@ -14,7 +14,10 @@ export async function PUT(
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  const { ticketId } = params;
+  // --- Get ticketId directly from the URL ---
+  const url = new URL(request.url);
+  const ticketId = url.pathname.split('/')[3]; // Extracts the ID from /api/tickets/[ticketId]/assign
+
   const body = await request.json();
   const { technicianName } = body;
 
