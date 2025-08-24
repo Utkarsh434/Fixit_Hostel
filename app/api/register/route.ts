@@ -11,6 +11,19 @@ export async function POST(request: Request) {
     return new NextResponse('Missing fields', { status: 400 });
   }
 
+  // --- NEW: Email Domain Validation ---
+  const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN;
+  if (!allowedDomain) {
+    console.error("ALLOWED_EMAIL_DOMAIN is not set in .env file");
+    return new NextResponse('Server configuration error', { status: 500 });
+  }
+
+  if (!email.endsWith(allowedDomain)) {
+    return new NextResponse(`Only emails from the ${allowedDomain} domain are allowed to register.`, { status: 403 });
+  }
+  // --- END of Validation ---
+
+
   const exist = await prisma.user.findUnique({
     where: { email },
   });
