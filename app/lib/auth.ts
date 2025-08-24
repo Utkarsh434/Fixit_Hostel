@@ -1,6 +1,7 @@
 // app/lib/auth.ts
 import { AuthOptions } from 'next-auth';
-import { PrismaAdapter } from '@auth/prisma-adapter';
+// ⬇️ change this line
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import prisma from '@/app/lib/prisma';
 import bcrypt from 'bcrypt';
@@ -19,7 +20,7 @@ export const authOptions: AuthOptions = {
           throw new Error('Invalid credentials');
         }
 
-        // Warden Login Logic
+        // Warden
         if (credentials.email === process.env.WARDEN_EMAIL) {
           if (credentials.password === process.env.WARDEN_PASSWORD) {
             let wardenUser = await prisma.user.findUnique({
@@ -36,25 +37,19 @@ export const authOptions: AuthOptions = {
               });
             }
             return wardenUser;
-          } else {
-            throw new Error('Invalid credentials');
           }
+          throw new Error('Invalid credentials');
         }
 
-        // Regular User Login Logic
+        // Regular user
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
-        if (!user || !user?.password) {
-          throw new Error('Invalid credentials');
-        }
-        const isCorrectPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-        if (!isCorrectPassword) {
-          throw new Error('Invalid credentials');
-        }
+        if (!user || !user.password) throw new Error('Invalid credentials');
+
+        const ok = await bcrypt.compare(credentials.password, user.password);
+        if (!ok) throw new Error('Invalid credentials');
+
         return user;
       },
     }),
@@ -62,10 +57,12 @@ export const authOptions: AuthOptions = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        // user is the object returned from authorize()
+        const u = user as { id: string; role: string };
+        token.id = u.id;
+        token.role = u.role;
       }
-      return token;
+      return token; // token now has id/role due to module augmentation
     },
     session({ session, token }) {
       if (session.user) {
@@ -76,8 +73,6 @@ export const authOptions: AuthOptions = {
     },
   },
   debug: process.env.NODE_ENV === 'development',
-  session: {
-    strategy: 'jwt',
-  },
+  session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
 };
