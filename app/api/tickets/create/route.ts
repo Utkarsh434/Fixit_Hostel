@@ -1,9 +1,9 @@
-// app/api/tickets/create/route.ts
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Category, Priority } from '@prisma/client'; // <-- Import enums
 
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("Missing GEMINI_API_KEY in .env file");
@@ -20,15 +20,15 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    // --- MODIFICATION: Get new fields from the body ---
     const { title, description, hostel, roomNumber } = body;
 
     if (!title || !description || !hostel || !roomNumber) {
       return new NextResponse('Missing required fields', { status: 400 });
     }
 
-    let aiCategory: any = 'OTHER';
-    let aiPriority: any = 'P3_NORMAL';
+    // --- MODIFICATION: Use specific types instead of 'any' ---
+    let aiCategory: Category = 'OTHER';
+    let aiPriority: Priority = 'P3_NORMAL';
 
     try {
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -65,8 +65,8 @@ export async function POST(request: Request) {
       data: {
         title,
         description,
-        hostel, // Save hostel
-        roomNumber, // Save room number
+        hostel,
+        roomNumber,
         studentId: session.user.id,
         category: aiCategory,
         priority: aiPriority,

@@ -5,12 +5,11 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Status } from '@prisma/client';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable'; // <-- 1. Import the autoTable function directly
-
+import 'jspdf-autotable';
 // This is a TypeScript extension to make the autoTable method available on jsPDF instances
 declare module 'jspdf' {
   interface jsPDF {
-    autoTable: (options: any) => jsPDF;
+    autoTable: (options: object) => jsPDF;
   }
 }
 
@@ -83,40 +82,40 @@ const WardenDashboard = () => {
     }
   };
 
-  const handlePrint = () => {
-    const doc = new jsPDF();
-    const tableColumn = ["Student", "Location", "Issue", "Priority", "Assigned To"];
-    const tableRows: any[] = [];
+   const handlePrint = () => {
+        const doc = new jsPDF();
+        const tableColumn = ["Student", "Location", "Issue", "Priority", "Assigned To"];
+        // --- MODIFICATION: Use a more specific type for table rows ---
+        const tableRows: (string | null)[][] = [];
 
-    const ticketsToPrint = tickets.filter(
-        (ticket) => ticket.status === 'ASSIGNED' || ticket.status === 'IN_PROGRESS'
-    );
+        const ticketsToPrint = tickets.filter(
+            (ticket) => ticket.status === 'ASSIGNED' || ticket.status === 'IN_PROGRESS'
+        );
 
-    ticketsToPrint.forEach(ticket => {
-        const ticketData = [
-            ticket.student.name,
-            `${ticket.hostel}, ${ticket.roomNumber}`,
-            ticket.title,
-            ticket.priority,
-            ticket.assignedTechnicianName || 'N/A',
-        ];
-        tableRows.push(ticketData);
-    });
+        ticketsToPrint.forEach(ticket => {
+            const ticketData = [
+                ticket.student.name,
+                `${ticket.hostel}, ${ticket.roomNumber}`,
+                ticket.title,
+                ticket.priority,
+                ticket.assignedTechnicianName || 'N/A',
+            ];
+            tableRows.push(ticketData);
+        });
 
-    doc.text("Hostel Maintenance Work Orders", 14, 15);
-    // --- 2. Call autoTable as a function, passing the doc instance ---
-    autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 20,
-    });
-    doc.save(`work-orders_${new Date().toISOString().slice(0, 10)}.pdf`);
-    toast.success('Work order PDF generated!');
-  };
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+        });
+        doc.text("Hostel Maintenance Work Orders", 14, 15);
+        doc.save(`work-orders_${new Date().toISOString().slice(0, 10)}.pdf`);
+        toast.success('Work order PDF generated!');
+    };
 
 
   if (isLoading) {
-    return <div className="p-6">Loading tickets...</div>;
+    return <div className="p-6 text-gray-500">Loading tickets...</div>;
   }
 
   const getPriorityColor = (priority: string) => {

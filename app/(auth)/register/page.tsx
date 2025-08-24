@@ -1,8 +1,9 @@
+// app/(auth)/register/page.tsx
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { HardHat } from 'lucide-react';
@@ -34,8 +35,11 @@ const RegisterPage = () => {
       await axios.post('/api/register', formData);
       toast.success('Registration successful! Please log in.');
       router.push('/login');
-    } catch (error: any) {
-      toast.error(error.response?.data || 'Something went wrong!');
+    } catch (error) {
+      // --- MODIFICATION: Properly type the error ---
+      const axiosError = error as AxiosError;
+      const errorMessage = (axiosError.response?.data as string) || 'Something went wrong!';
+      toast.error(errorMessage);
       console.error('Registration failed:', error);
     } finally {
       setIsLoading(false);
@@ -121,7 +125,7 @@ const RegisterPage = () => {
         </form>
          <p className="text-sm text-center text-gray-600">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-gray-800 hover:underline">
+            <Link href="/login" className="font-medium text-black hover:underline">
                 Log in
             </Link>
         </p>
