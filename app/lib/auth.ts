@@ -1,6 +1,5 @@
 // app/lib/auth.ts
 import { AuthOptions } from 'next-auth';
-// ⬇️ change this line
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import prisma from '@/app/lib/prisma';
