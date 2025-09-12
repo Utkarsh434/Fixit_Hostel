@@ -3,21 +3,28 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/auth';
 import prisma from '@/app/lib/prisma';
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { ticketId: string } }
-) {
-  // 1. Check if the user is a logged-in warden
+// This is the most robust way to define the DELETE function for Vercel builds
+export async function DELETE(request: Request) {
+  // 1. Get the session and check for Warden role
   const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'WARDEN') {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
+  // 2. Extract the ticket ID directly from the URL
+  // This avoids the complex type issue with 'params'
+  const url = new URL(request.url);
+  const ticketId = url.pathname.split('/')[3]; // Extracts the ID from /api/tickets/[ticketId]
+
+  if (!ticketId) {
+    return new NextResponse('Ticket ID is required', { status: 400 });
+  }
+
   try {
-    // 2. Delete the ticket from the database using its ID
+    // 3. Delete the ticket from the database using its ID
     await prisma.ticket.delete({
       where: {
-        id: params.ticketId,
+        id: ticketId,
       },
     });
 
@@ -31,3 +38,4 @@ export async function DELETE(
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+
